@@ -4,16 +4,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Ishkhan88/go-study/internal/model/auth"
-	"github.com/Ishkhan88/go-study/internal/model/bookings"
-	"github.com/Ishkhan88/go-study/internal/model/concert"
-	"github.com/Ishkhan88/go-study/internal/model/notification"
-	"github.com/Ishkhan88/go-study/internal/model/users"
+	"github.com/Ishkhan88/go-study/internal/model"
 )
 
 func main() {
 	// Пользователь (публичная модель)
-	u := users.User{
+	u := model.User{
 		ID:        1,
 		FirstName: "Ishkhan",
 		LastName:  "Khalatyan",
@@ -25,11 +21,11 @@ func main() {
 	}
 
 	// Данные для аутентификации (приватные поля через методы)
-	creds := auth.NewCredentials(u.ID, "<bcrypt-hash>")
-	creds.SetLastLoginAt(time.Now())
+	//creds := auth.NewCredentials(u.ID, "<bcrypt-hash>")
+	//creds.SetLastLoginAt(time.Now())
 
 	// Концерт с ценой билета
-	c := concert.Concert{
+	c := model.Concert{
 		ID:             10,
 		Title:          "Symphonic Rock Night",
 		Date:           time.Now().Add(7 * 24 * time.Hour),
@@ -43,26 +39,26 @@ func main() {
 	}
 
 	// Бронь (используем константы статусов)
-	b := bookings.Booking{
+	b := model.Booking{
 		ID:        1000,
 		UserID:    u.ID,
 		ConcertID: c.ID,
-		Status:    bookings.StatusPending,
+		Status:    model.StatusPending,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
 
 	// Запись об уведомлении
-	n := notification.Notification{
+	n := model.Notification{
 		ID:        5000,
 		UserID:    u.ID,
 		ConcertID: c.ID,
-		Status:    notification.NotifySuccess,
+		Status:    model.StatusSuccess,
 		SentAt:    time.Now(),
 	}
 
 	fmt.Printf("User: %s %s, email=%s, phone=%s\n", u.FirstName, u.LastName, u.Email, u.Phone)
-	fmt.Println("Auth (privates via methods): userID=", creds.UserID(), "hash=", creds.PasswordHash())
+	//fmt.Println("Auth (privates via methods): userID=", creds.UserID(), "hash=", creds.PasswordHash())
 	fmt.Printf("Concert: %s @ %s, price=%.2f, left=%d\n", c.Title, c.Location, c.TicketPrice, c.TicketsLeft)
 	fmt.Printf("Booking: id=%d, status=%s\n", b.ID, b.Status)
 	fmt.Printf("Notification: status=%s at %s\n", n.Status, n.SentAt.Format("2006-01-02 15:04:05"))
