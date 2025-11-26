@@ -2,32 +2,21 @@ package main
 
 import (
 	"fmt"
+
+	"github.com/Ishkhan88/go-study/internal/repository"
+	"github.com/Ishkhan88/go-study/internal/service"
 )
 
-// Функция для генерации шахматной доски
-func chessBoard(size int) string {
-	board := ""
+func main() {
+	service.Run()
 
-	for y := 0; y < size; y++ { // строки
-		for x := 0; x < size; x++ { // столбцы
-			// Если сумма координат чётная — пробел, иначе решётка
-			if (x+y)%2 == 0 {
-				board += " "
-			} else {
-				board += "#"
-			}
-		}
-		board += "\n" // переход на новую строку
+	fmt.Println("=== Все сохранённые коты ===")
+	for _, c := range repository.GetCats() {
+		fmt.Println(c.Name)
 	}
 
-	return board
-}
-
-func main() {
-	var size int
-	fmt.Print("Введите размер доски (например 8): ")
-	fmt.Scan(&size)
-
-	result := chessBoard(size)
-	fmt.Println(result)
+	fmt.Println("=== Все сохранённые собаки ===")
+	for _, d := range repository.GetDogs() {
+		fmt.Println(d.Name)
+	}
 }
