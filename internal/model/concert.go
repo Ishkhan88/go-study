@@ -15,3 +15,7 @@ type Concert struct {
 	CreatedAt      time.Time `json:"created_at"`      // дата создания записи
 	UpdatedAt      time.Time `json:"updated_at"`      // дата обновления записи
 }
+
+func (c Concert) GetID() int {
+	return c.ID
+}

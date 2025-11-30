@@ -14,3 +14,7 @@ type User struct {
 	CreatedAt time.Time `json:"created_at"` // когда создан профиль
 	UpdatedAt time.Time `json:"updated_at"` // когда обновлён профиль
 }
+
+func (u User) GetID() int {
+	return u.ID
+}

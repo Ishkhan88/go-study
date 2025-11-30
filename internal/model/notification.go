@@ -15,3 +15,7 @@ type Notification struct {
 	Status    string    `json:"status"`     // success / failed
 	SentAt    time.Time `json:"sent_at"`    // дата и время отправки
 }
+
+func (n Notification) GetID() int {
+	return n.ID
+}

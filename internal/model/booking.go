@@ -18,3 +18,7 @@ type Booking struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
+
+func (b Booking) GetID() int {
+	return b.ID
+}
