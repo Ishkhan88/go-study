@@ -4,12 +4,13 @@ import (
 	"time"
 
 	"github.com/Ishkhan88/go-study/internal/model"
-	"github.com/Ishkhan88/go-study/internal/repository"
 )
 
 // StartGenerator запускает периодическое создание данных
-func StartGenerator(interval time.Duration) {
+func StartGenerator(ch chan<- model.Entity, interval time.Duration) {
 	ticker := time.NewTicker(interval)
+	id := 1
+
 	for range ticker.C {
 
 		user := model.User{ // 1. Пользователь
@@ -19,7 +20,7 @@ func StartGenerator(interval time.Duration) {
 			Email:     "user@example.com",
 			Phone:     "8-900-000-00-00",
 		}
-		repository.SaveEntity(user)
+		ch <- user
 
 		concert := model.Concert{ // 2. Концерт
 			ID:             345,
@@ -31,7 +32,7 @@ func StartGenerator(interval time.Duration) {
 			TicketPrice:    1599.0,
 			OrganizerEmail: "userOrganizer@example.com",
 		}
-		repository.SaveEntity(concert)
+		ch <- concert
 
 		booking := model.Booking{ // 3. Бронирование
 			ID:        555,
@@ -39,7 +40,7 @@ func StartGenerator(interval time.Duration) {
 			ConcertID: concert.ID,
 			Status:    model.StatusPending,
 		}
-		repository.SaveEntity(booking)
+		ch <- booking
 
 		notification := model.Notification{ // 4. Уведомление
 			ID:        888,
@@ -47,6 +48,8 @@ func StartGenerator(interval time.Duration) {
 			ConcertID: concert.ID,
 			Status:    "created",
 		}
-		repository.SaveEntity(notification)
+		ch <- notification
+
+		id++
 	}
 }
