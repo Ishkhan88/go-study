@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"sync"
@@ -56,9 +57,16 @@ func SaveEntity(e model.Entity) {
 }
 
 // StartSaver - работает в горутине читает из канала и передаёт в SaveEntity
-func StartSaver(ch <-chan model.Entity) {
-	for e := range ch {
-		SaveEntity(e)
+func StartSaver(ctx context.Context, wg *sync.WaitGroup, ch <-chan model.Entity) {
+	defer wg.Done()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return // exit goroutine
+		case e := <-ch:
+			SaveEntity(e)
+		}
 	}
 }
 
@@ -99,44 +107,50 @@ func GetNotificationSafeCopy() []model.Notification {
 }
 
 // NewItemsLogger — логгер, который проверяет новые элементы в слайсах и выводит их
-func NewItemsLogger(interval time.Duration) {
+func NewItemsLogger(ctx context.Context, wg *sync.WaitGroup, interval time.Duration) {
+	defer wg.Done()
+
 	ticker := time.NewTicker(interval)
 
 	var prevUser, prevConcert, prevBooking, prevNotification int
 
-	for range ticker.C {
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			user := GetUserSafeCopy()
+			concert := GetConcertSafeCopy()
+			booking := GetBookingSafeCopy()
+			notification := GetNotificationSafeCopy()
 
-		u := GetUserSafeCopy()
-		c := GetConcertSafeCopy()
-		b := GetBookingSafeCopy()
-		n := GetNotificationSafeCopy()
-
-		if len(u) > prevUser {
-			for i := prevUser; i < len(u); i++ {
-				log.Printf("New User added: %+v\n", u[i])
+			if len(user) > prevUser {
+				for i := prevUser; i < len(user); i++ {
+					log.Printf("New User added: %+v\n", user[i])
+				}
+				prevUser = len(user)
 			}
-			prevUser = len(u)
-		}
 
-		if len(c) > prevConcert {
-			for i := prevConcert; i < len(c); i++ {
-				log.Printf("New Concert added: %+v\n", c[i])
+			if len(concert) > prevConcert {
+				for i := prevConcert; i < len(concert); i++ {
+					log.Printf("New Concert added: %+v\n", concert[i])
+				}
+				prevConcert = len(concert)
 			}
-			prevConcert = len(c)
-		}
 
-		if len(b) > prevBooking {
-			for i := prevBooking; i < len(b); i++ {
-				log.Printf("New Booking added: %+v\n", b[i])
+			if len(booking) > prevBooking {
+				for i := prevBooking; i < len(booking); i++ {
+					log.Printf("New Booking added: %+v\n", booking[i])
+				}
+				prevBooking = len(booking)
 			}
-			prevBooking = len(b)
-		}
 
-		if len(n) > prevNotification {
-			for i := prevNotification; i < len(n); i++ {
-				log.Printf("New Notification added: %+v\n", n[i])
+			if len(notification) > prevNotification {
+				for i := prevNotification; i < len(notification); i++ {
+					log.Printf("New Notification added: %+v\n", notification[i])
+				}
+				prevNotification = len(notification)
 			}
-			prevNotification = len(n)
 		}
 	}
 }
