@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/Ishkhan88/go-study/internal/model"
-	"github.com/Ishkhan88/go-study/internal/repository"
 	"github.com/Ishkhan88/go-study/internal/service"
 )
 
@@ -67,8 +66,8 @@ func main() {
 
 	ch := make(chan model.Entity)
 
-	go repository.StartSaver(ch)
-	go repository.NewItemsLogger(200 * time.Millisecond)
+	go service.StartSaver(ch)
+	go service.NewItemsLogger(200 * time.Millisecond)
 	go service.StartGenerator(ch, 2*time.Second)
 
 	select {}
