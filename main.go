@@ -1,7 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/Ishkhan88/go-study/internal/model"
@@ -64,11 +68,15 @@ func main() {
 	fmt.Printf("Booking: id=%d, status=%s\n", b.ID, b.Status)
 	fmt.Printf("Notification: status=%s at %s\n", n.Status, n.SentAt.Format("2006-01-02 15:04:05"))
 
-	ch := make(chan model.Entity)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
 
-	go service.StartSaver(ch)
-	go service.NewItemsLogger(200 * time.Millisecond)
-	go service.StartGenerator(ch, 2*time.Second)
+	// передаем ctx в сервисы
+	go service.StartGenerator(ctx, ch, 2*time.Second)
+	go service.StartSaver(ctx, ch)
+	go service.NewItemsLogger(ctx, 200*time.Millisecond)
 
-	select {}
+	// блокируем main
+	<-ctx.Done()
+	fmt.Println("Graceful shutdown completed")
 }
