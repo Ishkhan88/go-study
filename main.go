@@ -68,6 +68,8 @@ func main() {
 	fmt.Printf("Booking: id=%d, status=%s\n", b.ID, b.Status)
 	fmt.Printf("Notification: status=%s at %s\n", n.Status, n.SentAt.Format("2006-01-02 15:04:05"))
 
+	ch := make(chan model.Entity)
+
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
