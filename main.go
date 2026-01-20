@@ -9,10 +9,16 @@ import (
 	"time"
 
 	"github.com/Ishkhan88/go-study/internal/model"
+	"github.com/Ishkhan88/go-study/internal/repository"
 	"github.com/Ishkhan88/go-study/internal/service"
 )
 
 func main() {
+	// Восстановление данных из файлов при старте
+	if err := repository.LoadFromFiles(); err != nil {
+		fmt.Println("load error:", err)
+	}
+
 	// Пользователь (публичная модель)
 	u := model.User{
 		ID:        1,
@@ -68,7 +74,7 @@ func main() {
 	fmt.Printf("Booking: id=%d, status=%s\n", b.ID, b.Status)
 	fmt.Printf("Notification: status=%s at %s\n", n.Status, n.SentAt.Format("2006-01-02 15:04:05"))
 
-	ch := make(chan model.Entity)
+	ch := make(chan model.Entity, 64)
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
