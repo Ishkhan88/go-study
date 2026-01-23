@@ -8,52 +8,48 @@ import (
 	"github.com/Ishkhan88/go-study/internal/repository"
 )
 
-// Глобальные переменные для хранения последних размеров (или лучше использовать структуру)
-var (
-	lastUsersCount         = 0
-	lastConcertsCount      = 0
-	lastBookingsCount      = 0
-	lastNotificationsCount = 0
-)
-
-// NewItemsLogger запускает фоновую горутину, которая логирует новые элементы
 func NewItemsLogger(ctx context.Context, interval time.Duration) {
-	go func() {
-		ticker := time.NewTicker(interval)
-		defer ticker.Stop()
+	// 1) Baseline: сколько элементов уже есть на старте (после LoadFromFiles)
+	lastUserCount := len(repository.GetUserSafeCopy())
+	lastConcertCount := len(repository.GetConcertSafeCopy())
+	lastBookingCount := len(repository.GetBookingSafeCopy())
+	lastNotificationCount := len(repository.GetNotificationSafeCopy())
 
-		for {
-			select {
-			case <-ctx.Done():
-				log.Println("Логгер новых элементов остановлен")
-				return
-			case <-ticker.C:
-				users := repository.GetUsersSafeCopy()
-				concerts := repository.GetConcertsSafeCopy()
-				bookings := repository.GetBookingsSafeCopy()
-				notifications := repository.GetNotificationsSafeCopy()
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
 
-				if len(users) > lastUsersCount {
-					log.Println("Новые пользователи:", len(users)-lastUsersCount, "шт.")
-					// Или: users[lastUsersCount:]
-					lastUsersCount = len(users)
-				}
+	for {
+		select {
+		case <-ctx.Done():
+			log.Println("NewItemsLogger stopped")
+			return
 
-				if len(concerts) > lastConcertsCount {
-					log.Println("Новые концерты:", len(concerts)-lastConcertsCount, "шт.")
-					lastConcertsCount = len(concerts)
-				}
+		case <-ticker.C:
+			users := repository.GetUserSafeCopy()
+			concerts := repository.GetConcertSafeCopy()
+			bookings := repository.GetBookingSafeCopy()
+			notifications := repository.GetNotificationSafeCopy()
 
-				if len(bookings) > lastBookingsCount {
-					log.Println("Новые бронирования:", len(bookings)-lastBookingsCount, "шт.")
-					lastBookingsCount = len(bookings)
-				}
+			// 2) Если кто-то добавился — логируем только новые элементы
+			if len(users) > lastUserCount {
+				log.Printf("Added users: %v\n", users[lastUserCount:])
+				lastUserCount = len(users)
+			}
 
-				if len(notifications) > lastNotificationsCount {
-					log.Println("Новые уведомления:", len(notifications)-lastNotificationsCount, "шт.")
-					lastNotificationsCount = len(notifications)
-				}
+			if len(concerts) > lastConcertCount {
+				log.Printf("Added concerts: %v\n", concerts[lastConcertCount:])
+				lastConcertCount = len(concerts)
+			}
+
+			if len(bookings) > lastBookingCount {
+				log.Printf("Added bookings: %v\n", bookings[lastBookingCount:])
+				lastBookingCount = len(bookings)
+			}
+
+			if len(notifications) > lastNotificationCount {
+				log.Printf("Added notifications: %v\n", notifications[lastNotificationCount:])
+				lastNotificationCount = len(notifications)
 			}
 		}
-	}()
+	}
 }
