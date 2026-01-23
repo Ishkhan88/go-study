@@ -35,7 +35,7 @@ var (
 
 // LoadFromFiles нужно вызвать при старте программы.
 // Она наполнит все слайсы данными из файлов.
-func LoadFromFiles() error {
+func LoadFromFile() error {
 	if err := os.MkdirAll(dataDir, 0o755); err != nil {
 		return fmt.Errorf("mkdir data dir: %w", err)
 	}

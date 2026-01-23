@@ -2,89 +2,78 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"github.com/Ishkhan88/go-study/internal/model"
 	"github.com/Ishkhan88/go-study/internal/repository"
 	"github.com/Ishkhan88/go-study/internal/service"
 )
 
 func main() {
-	// Восстановление данных из файлов при старте
+	// 1) Восстановление данных из CSV при старте (чтобы слайсы наполнились)
 	if err := repository.LoadFromFiles(); err != nil {
-		fmt.Println("load error:", err)
+		log.Println("load error:", err)
 	}
 
-	// Пользователь (публичная модель)
-	u := model.User{
-		ID:        1,
-		FirstName: "Ishkhan",
-		LastName:  "Khalatyan",
-		Email:     "Khalatian88@yandex.ru",
-		Phone:     "+995500112233",
-		AvatarURL: "https://example.com/avatar.png",
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	}
-
-	// Данные для аутентификации (приватные поля через методы)
-	//creds := auth.NewCredentials(u.ID, "<bcrypt-hash>")
-	//creds.SetLastLoginAt(time.Now())
-
-	// Концерт с ценой билета
-	c := model.Concert{
-		ID:             10,
-		Title:          "Symphonic Rock Night",
-		Date:           time.Now().Add(7 * 24 * time.Hour),
-		Location:       "Moscow Arena",
-		TicketPrice:    1500.99,
-		TicketsTotal:   100,
-		TicketsLeft:    100,
-		OrganizerEmail: "organizer@example.com",
-		CreatedAt:      time.Now(),
-		UpdatedAt:      time.Now(),
-	}
-
-	// Бронь (используем константы статусов)
-	b := model.Booking{
-		ID:        1000,
-		UserID:    u.ID,
-		ConcertID: c.ID,
-		Status:    model.StatusPending,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	}
-
-	// Запись об уведомлении
-	n := model.Notification{
-		ID:        5000,
-		UserID:    u.ID,
-		ConcertID: c.ID,
-		Status:    model.StatusSuccess,
-		SentAt:    time.Now(),
-	}
-
-	fmt.Printf("User: %s %s, email=%s, phone=%s\n", u.FirstName, u.LastName, u.Email, u.Phone)
-	//fmt.Println("Auth (privates via methods): userID=", creds.UserID(), "hash=", creds.PasswordHash())
-	fmt.Printf("Concert: %s @ %s, price=%.2f, left=%d\n", c.Title, c.Location, c.TicketPrice, c.TicketsLeft)
-	fmt.Printf("Booking: id=%d, status=%s\n", b.ID, b.Status)
-	fmt.Printf("Notification: status=%s at %s\n", n.Status, n.SentAt.Format("2006-01-02 15:04:05"))
-
-	ch := make(chan model.Entity, 64)
-
+	// 2) context для graceful shutdown
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	// передаем ctx в сервисы
-	go service.StartGenerator(ctx, ch, 2*time.Second)
-	go service.StartSaver(ctx, ch)
+	// 3) Роуты webserver
+	mux := http.NewServeMux()
+
+	// Users
+	mux.HandleFunc("/api/users", service.UsersHandler) // GET list
+	mux.HandleFunc("/api/user", service.UserHandler)   // POST create
+	mux.HandleFunc("/api/user/", service.UserHandler)  // GET/PUT/DELETE by id
+
+	// Concerts
+	mux.HandleFunc("/api/concerts", service.ConcertsHandler)
+	mux.HandleFunc("/api/concert", service.ConcertHandler)
+	mux.HandleFunc("/api/concert/", service.ConcertHandler)
+
+	// Bookings
+	mux.HandleFunc("/api/bookings", service.BookingsHandler)
+	mux.HandleFunc("/api/booking", service.BookingHandler)
+	mux.HandleFunc("/api/booking/", service.BookingHandler)
+
+	// Notifications
+	mux.HandleFunc("/api/notifications", service.NotificationsHandler)
+	mux.HandleFunc("/api/notification", service.NotificationHandler)
+	mux.HandleFunc("/api/notification/", service.NotificationHandler)
+
+	// 4) Запускаем логгер (после LoadFromFiles — чтобы НЕ логировать старые данные)
 	go service.NewItemsLogger(ctx, 200*time.Millisecond)
 
-	// блокируем main
+	// 5) Запуск HTTP сервера
+	server := &http.Server{
+		Addr:    ":8080",
+		Handler: mux,
+	}
+
+	go func() {
+		log.Println("API server started: http://localhost:8080")
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Println("server error:", err)
+			stop() // если сервер упал — завершаем приложение
+		}
+	}()
+
+	// 6) ждём сигнал ОС
 	<-ctx.Done()
-	fmt.Println("Graceful shutdown completed")
+	log.Println("Shutdown signal received...")
+
+	// 7) останавливаем сервер аккуратно (даем время завершить запросы)
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(shutdownCtx); err != nil {
+		log.Println("server shutdown error:", err)
+	}
+
+	log.Println("Graceful shutdown completed")
 }
