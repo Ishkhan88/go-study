@@ -10,10 +10,10 @@ import (
 
 func NewItemsLogger(ctx context.Context, interval time.Duration) {
 	// 1) Baseline: сколько элементов уже есть на старте (после LoadFromFiles)
-	lastUserCount := len(repository.GetUserSafeCopy())
-	lastConcertCount := len(repository.GetConcertSafeCopy())
-	lastBookingCount := len(repository.GetBookingSafeCopy())
-	lastNotificationCount := len(repository.GetNotificationSafeCopy())
+	lastUserCount := len(repository.GetUsersSafeCopy())
+	lastConcertCount := len(repository.GetConcertsSafeCopy())
+	lastBookingCount := len(repository.GetBookingsSafeCopy())
+	lastNotificationCount := len(repository.GetNotificationsSafeCopy())
 
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
@@ -25,10 +25,10 @@ func NewItemsLogger(ctx context.Context, interval time.Duration) {
 			return
 
 		case <-ticker.C:
-			users := repository.GetUserSafeCopy()
-			concerts := repository.GetConcertSafeCopy()
-			bookings := repository.GetBookingSafeCopy()
-			notifications := repository.GetNotificationSafeCopy()
+			users := repository.GetUsersSafeCopy()
+			concerts := repository.GetConcertsSafeCopy()
+			bookings := repository.GetBookingsSafeCopy()
+			notifications := repository.GetNotificationsSafeCopy()
 
 			// 2) Если кто-то добавился — логируем только новые элементы
 			if len(users) > lastUserCount {
