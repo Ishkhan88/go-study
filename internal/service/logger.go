@@ -30,7 +30,6 @@ func NewItemsLogger(ctx context.Context, interval time.Duration) {
 			bookings := repository.GetBookingsSafeCopy()
 			notifications := repository.GetNotificationsSafeCopy()
 
-			// 2) Если кто-то добавился — логируем только новые элементы
 			if len(users) > lastUserCount {
 				log.Printf("Added users: %v\n", users[lastUserCount:])
 				lastUserCount = len(users)
