@@ -10,7 +10,7 @@ type Config struct {
 
 func Default() Config {
 	return Config{
-		ServerAddr:      ":8080",
+		ServerAddr:      ":8081",
 		ShutdownTimeout: 5 * time.Second,
 		LogInterval:     200 * time.Millisecond,
 	}

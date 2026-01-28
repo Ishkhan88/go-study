@@ -8,13 +8,27 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 
+	_ "github.com/Ishkhan88/go-study/docs"
 	"github.com/Ishkhan88/go-study/internal/config"
 	"github.com/Ishkhan88/go-study/internal/repository"
 	"github.com/Ishkhan88/go-study/internal/service"
+	"github.com/joho/godotenv"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
+// @title           Go Study API
+// @version         1.0
+// @description     CRUD API for users, concerts, bookings, notifications.
+// @host            localhost:8081
+// @BasePath        /
+// @securityDefinitions.apikey BearerAuth
+// @in              header
+// @name            Authorization
+
 func main() {
+	_ = godotenv.Load()
 	cfg := config.Default()
 
 	if err := repository.LoadFromFiles(); err != nil {
@@ -26,41 +40,47 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/api/users", service.UsersHandler) // GET list
-	mux.HandleFunc("/api/user", service.UserHandler)   // POST create
-	mux.HandleFunc("/api/user/", service.UserHandler)  // GET/PUT/DELETE by id
+	mux.HandleFunc("/api/login", service.LoginHandler)
+	mux.HandleFunc("/swagger/", httpSwagger.WrapHandler)
 
-	mux.HandleFunc("/api/concerts", service.ConcertsHandler)
-	mux.HandleFunc("/api/concert", service.ConcertHandler)
-	mux.HandleFunc("/api/concert/", service.ConcertHandler)
+	// USERS
+	mux.HandleFunc("/api/users", service.UserHandler) // GET list
+	mux.HandleFunc("/api/user", service.UserHandler)  // POST create
+	mux.HandleFunc("/api/user/", service.UserHandler) // GET/PUT/DELETE by id
 
-	mux.HandleFunc("/api/bookings", service.BookingsHandler)
-	mux.HandleFunc("/api/booking", service.BookingHandler)
-	mux.HandleFunc("/api/booking/", service.BookingHandler)
+	// CONCERTS
+	mux.HandleFunc("/api/concerts", service.ConcertHandler) // GET list
+	mux.HandleFunc("/api/concert", service.ConcertHandler)  // POST create
+	mux.HandleFunc("/api/concert/", service.ConcertHandler) // GET/PUT/DELETE by id
 
-	mux.HandleFunc("/api/notifications", service.NotificationsHandler)
-	mux.HandleFunc("/api/notification", service.NotificationHandler)
-	mux.HandleFunc("/api/notification/", service.NotificationHandler)
+	// BOOKINGS
+	mux.HandleFunc("/api/bookings", service.BookingHandler) // GET list
+	mux.HandleFunc("/api/booking", service.BookingHandler)  // POST create
+	mux.HandleFunc("/api/booking/", service.BookingHandler) // GET/PUT/DELETE by id
+
+	// NOTIFICATIONS
+	mux.HandleFunc("/api/notifications", service.NotificationHandler) // GET list
+	mux.HandleFunc("/api/notification", service.NotificationHandler)  // POST create
+	mux.HandleFunc("/api/notification/", service.NotificationHandler) // GET/PUT/DELETE by id
 
 	server := &http.Server{
-		Addr:    cfg.ServerAddr,
-		Handler: mux,
+		Addr:              cfg.ServerAddr,
+		Handler:           mux,
+		ReadHeaderTimeout: 5 * time.Second,
 	}
 
 	var wg sync.WaitGroup
 
-	// 4) запускаем логгер (и ждём его завершение)
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
 		service.NewItemsLogger(ctx, cfg.LogInterval)
 	}()
 
-	// 5) запускаем сервер (и ждём завершение горутины)
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		log.Println("API server started: http://localhost" + cfg.ServerAddr)
+		log.Println("API server started on", cfg.ServerAddr)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Println("server error:", err)
 			stop()
@@ -68,11 +88,9 @@ func main() {
 		log.Println("HTTP server goroutine stopped")
 	}()
 
-	// 6) ждём сигнал
 	<-ctx.Done()
 	log.Println("Shutdown signal received...")
 
-	// 7) корректно останавливаем http сервер
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), cfg.ShutdownTimeout)
 	defer cancel()
 
@@ -80,7 +98,6 @@ func main() {
 		log.Println("server shutdown error:", err)
 	}
 
-	// 8) ждём завершения логгера и сервера
 	wg.Wait()
 	log.Println("Graceful shutdown completed")
 }

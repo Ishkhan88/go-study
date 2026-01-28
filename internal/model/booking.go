@@ -2,7 +2,6 @@ package model
 
 import "time"
 
-// Status значения можно оформить как константы.
 const (
 	StatusPending   = "pending"   //бронь в статусе "ожидание"
 	StatusConfirmed = "confirmed" //бронь в статусе "подтверждено"
