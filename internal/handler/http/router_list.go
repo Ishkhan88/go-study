@@ -1,4 +1,4 @@
-package service
+package http
 
 import (
 	"net/http"
@@ -17,14 +17,7 @@ func UsersHandler(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, 405, "only GET")
 		return
 	}
-
-	// Подстрой под реальные функции репозитория:
-	// users := repository.GetUsers()
-	// или users := repository.ListUsers()
-	// или users := repository.UsersAll()
-
-	users := repository.GetUsers() // <-- если такого нет, см. ниже
-	writeJSON(w, 200, users)
+	writeJSON(w, 200, repository.GetUsers())
 }
 
 // ConcertsList godoc
@@ -38,9 +31,7 @@ func ConcertsHandler(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, 405, "only GET")
 		return
 	}
-
-	concerts := repository.GetConcerts() // <-- если такого нет, см. ниже
-	writeJSON(w, 200, concerts)
+	writeJSON(w, 200, repository.GetConcerts())
 }
 
 // BookingsList godoc
@@ -54,9 +45,7 @@ func BookingsHandler(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, 405, "only GET")
 		return
 	}
-
-	bookings := repository.GetBookings() // <-- если такого нет, см. ниже
-	writeJSON(w, 200, bookings)
+	writeJSON(w, 200, repository.GetBookings())
 }
 
 // NotificationsList godoc
@@ -70,7 +59,5 @@ func NotificationsHandler(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, 405, "only GET")
 		return
 	}
-
-	notifications := repository.GetNotifications() // <-- если такого нет, см. ниже
-	writeJSON(w, 200, notifications)
+	writeJSON(w, 200, repository.GetNotifications())
 }

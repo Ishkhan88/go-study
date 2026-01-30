@@ -1,5 +1,17 @@
 basePath: /
 definitions:
+  http.LoginRequest:
+    properties:
+      login:
+        type: string
+      password:
+        type: string
+    type: object
+  http.LoginResponse:
+    properties:
+      token:
+        type: string
+    type: object
   model.Booking:
     properties:
       concert_id:
@@ -94,18 +106,6 @@ definitions:
         description: когда обновлён профиль
         type: string
     type: object
-  service.LoginRequest:
-    properties:
-      login:
-        type: string
-      password:
-        type: string
-    type: object
-  service.LoginResponse:
-    properties:
-      token:
-        type: string
-    type: object
 host: localhost:8081
 info:
   contact: {}
@@ -113,312 +113,32 @@ info:
   title: Go Study API
   version: "1.0"
 paths:
-  /api/booking:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: Booking
-        in: body
-        name: booking
-        required: true
-        schema:
-          $ref: '#/definitions/model.Booking'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/model.Booking'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Create booking
-      tags:
-      - bookings
-  /api/booking/{id}:
-    delete:
-      parameters:
-      - description: Booking ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Delete booking by id
-      tags:
-      - bookings
+  /api/bookings:
     get:
-      parameters:
-      - description: Booking ID
-        in: path
-        name: id
-        required: true
-        type: integer
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Booking'
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Get booking by id
+            items:
+              $ref: '#/definitions/model.Booking'
+            type: array
+      summary: List bookings
       tags:
       - bookings
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: Booking ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Booking
-        in: body
-        name: booking
-        required: true
-        schema:
-          $ref: '#/definitions/model.Booking'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Booking'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Update booking by id
-      tags:
-      - bookings
-  /api/concert:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: Concert
-        in: body
-        name: concert
-        required: true
-        schema:
-          $ref: '#/definitions/model.Concert'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/model.Concert'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Create concert
-      tags:
-      - concerts
-  /api/concert/{id}:
-    delete:
-      parameters:
-      - description: Concert ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Delete concert by id
-      tags:
-      - concerts
+  /api/concerts:
     get:
-      parameters:
-      - description: Concert ID
-        in: path
-        name: id
-        required: true
-        type: integer
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Concert'
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Get concert by id
-      tags:
-      - concerts
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: Concert ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Concert
-        in: body
-        name: concert
-        required: true
-        schema:
-          $ref: '#/definitions/model.Concert'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Concert'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Update concert by id
+            items:
+              $ref: '#/definitions/model.Concert'
+            type: array
+      summary: List concerts
       tags:
       - concerts
   /api/login:
@@ -432,14 +152,14 @@ paths:
         name: credentials
         required: true
         schema:
-          $ref: '#/definitions/service.LoginRequest'
+          $ref: '#/definitions/http.LoginRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.LoginResponse'
+            $ref: '#/definitions/http.LoginResponse'
         "400":
           description: Bad Request
           schema:
@@ -455,312 +175,32 @@ paths:
       summary: Login
       tags:
       - auth
-  /api/notification:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: Notification
-        in: body
-        name: notification
-        required: true
-        schema:
-          $ref: '#/definitions/model.Notification'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/model.Notification'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Create notification
-      tags:
-      - notifications
-  /api/notification/{id}:
-    delete:
-      parameters:
-      - description: Notification ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Delete notification by id
-      tags:
-      - notifications
+  /api/notifications:
     get:
-      parameters:
-      - description: Notification ID
-        in: path
-        name: id
-        required: true
-        type: integer
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Notification'
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Get notification by id
+            items:
+              $ref: '#/definitions/model.Notification'
+            type: array
+      summary: List notifications
       tags:
       - notifications
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: Notification ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Notification
-        in: body
-        name: notification
-        required: true
-        schema:
-          $ref: '#/definitions/model.Notification'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Notification'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Update notification by id
-      tags:
-      - notifications
-  /api/user:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: User
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/model.User'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/model.User'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Create user
-      tags:
-      - users
-  /api/user/{id}:
-    delete:
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Delete user by id
-      tags:
-      - users
+  /api/users:
     get:
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: integer
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.User'
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Get user by id
-      tags:
-      - users
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: User
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/model.User'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.User'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Update user by id
+            items:
+              $ref: '#/definitions/model.User'
+            type: array
+      summary: List users
       tags:
       - users
 securityDefinitions:

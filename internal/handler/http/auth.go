@@ -1,4 +1,4 @@
-package service
+package http
 
 import (
 	"encoding/json"
@@ -41,35 +41,32 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// берем логин/пароль из .env
-	adminLogin := os.Getenv("ADMIN_LOGIN")
-	adminPassword := os.Getenv("ADMIN_PASSWORD")
+	expectedLogin := os.Getenv("LOGIN")
+	expectedPassword := os.Getenv("PASSWORD")
 	secret := os.Getenv("JWT_SECRET")
 
-	if secret == "" {
-		writeErr(w, 500, "JWT_SECRET is empty")
+	if expectedLogin == "" || expectedPassword == "" || secret == "" {
+		writeErr(w, 500, "auth env is not configured")
 		return
 	}
 
-	// сравниваем
-	if req.Login != adminLogin || req.Password != adminPassword {
-		writeErr(w, 401, "invalid login or password")
+	if req.Login != expectedLogin || req.Password != expectedPassword {
+		writeErr(w, 401, "invalid credentials")
 		return
 	}
 
-	// создаём токен на 1 час
 	claims := jwt.MapClaims{
 		"sub": req.Login,
-		"exp": time.Now().Add(1 * time.Hour).Unix(),
+		"exp": time.Now().Add(24 * time.Hour).Unix(),
+		"iat": time.Now().Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	signedToken, err := token.SignedString([]byte(secret))
+	signed, err := token.SignedString([]byte(secret))
 	if err != nil {
-		writeErr(w, 500, "failed to sign token")
+		writeErr(w, 500, "token sign error")
 		return
 	}
 
-	writeJSON(w, 200, LoginResponse{Token: signedToken})
+	writeJSON(w, 200, LoginResponse{Token: signed})
 }

@@ -12,6 +12,7 @@ import (
 
 	_ "github.com/Ishkhan88/go-study/docs"
 	"github.com/Ishkhan88/go-study/internal/config"
+	handlerhttp "github.com/Ishkhan88/go-study/internal/handler/http"
 	"github.com/Ishkhan88/go-study/internal/repository"
 	"github.com/Ishkhan88/go-study/internal/service"
 	"github.com/joho/godotenv"
@@ -40,29 +41,28 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/api/login", service.LoginHandler)
+	mux.HandleFunc("/api/login", handlerhttp.LoginHandler)
 	mux.HandleFunc("/swagger/", httpSwagger.WrapHandler)
 
 	// USERS
-	mux.HandleFunc("/api/users", service.UserHandler) // GET list
-	mux.HandleFunc("/api/user", service.UserHandler)  // POST create
-	mux.HandleFunc("/api/user/", service.UserHandler) // GET/PUT/DELETE by id
+	mux.HandleFunc("/api/users", handlerhttp.UsersHandler)
+	mux.HandleFunc("/api/user", handlerhttp.UserHandler)
+	mux.HandleFunc("/api/user/", handlerhttp.UserHandler)
 
 	// CONCERTS
-	mux.HandleFunc("/api/concerts", service.ConcertHandler) // GET list
-	mux.HandleFunc("/api/concert", service.ConcertHandler)  // POST create
-	mux.HandleFunc("/api/concert/", service.ConcertHandler) // GET/PUT/DELETE by id
+	mux.HandleFunc("/api/concerts", handlerhttp.ConcertsHandler)
+	mux.HandleFunc("/api/concert", handlerhttp.ConcertHandler)
+	mux.HandleFunc("/api/concert/", handlerhttp.ConcertHandler)
 
 	// BOOKINGS
-	mux.HandleFunc("/api/bookings", service.BookingHandler) // GET list
-	mux.HandleFunc("/api/booking", service.BookingHandler)  // POST create
-	mux.HandleFunc("/api/booking/", service.BookingHandler) // GET/PUT/DELETE by id
+	mux.HandleFunc("/api/bookings", handlerhttp.BookingsHandler)
+	mux.HandleFunc("/api/booking", handlerhttp.BookingHandler)
+	mux.HandleFunc("/api/booking/", handlerhttp.BookingHandler)
 
 	// NOTIFICATIONS
-	mux.HandleFunc("/api/notifications", service.NotificationHandler) // GET list
-	mux.HandleFunc("/api/notification", service.NotificationHandler)  // POST create
-	mux.HandleFunc("/api/notification/", service.NotificationHandler) // GET/PUT/DELETE by id
-
+	mux.HandleFunc("/api/notifications", handlerhttp.NotificationsHandler)
+	mux.HandleFunc("/api/notification", handlerhttp.NotificationHandler)
+	mux.HandleFunc("/api/notification/", handlerhttp.NotificationHandler)
 	server := &http.Server{
 		Addr:              cfg.ServerAddr,
 		Handler:           mux,
