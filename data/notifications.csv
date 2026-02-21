@@ -1,0 +1,2 @@
+id,user_id,concert_id,status,sent_at,sent_at_rfc3339
+1,2,2,success,,2026-02-21T04:06:00+03:00

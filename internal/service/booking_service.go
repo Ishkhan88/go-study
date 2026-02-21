@@ -8,8 +8,14 @@ import (
 )
 
 func CreateBooking(b model.Booking) (model.Booking, error) {
-	if b.ID == 0 || b.UserID == 0 || b.ConcertID == 0 {
+	// Create не должен требовать ID от клиента
+	if b.UserID == 0 || b.ConcertID == 0 {
 		return model.Booking{}, ErrBadInput
+	}
+
+	// генерируем ID
+	if b.ID == 0 {
+		b.ID = repository.GetNextBookingID()
 	}
 
 	if b.Status == "" {
@@ -79,4 +85,8 @@ func DeleteBooking(id int) error {
 		return ErrNotFound
 	}
 	return nil
+}
+
+func ListBookings() []model.Booking {
+	return repository.GetBookingSafeCopy()
 }

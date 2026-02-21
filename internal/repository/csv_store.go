@@ -148,6 +148,19 @@ func AddUser(u model.User) error {
 	return saveUsers()
 }
 
+func GetNextUserID() int {
+	muUser.Lock()
+	defer muUser.Unlock()
+
+	maxID := 0
+	for _, u := range user {
+		if u.ID > maxID {
+			maxID = u.ID
+		}
+	}
+	return maxID + 1
+}
+
 func UpdateUser(id int, upd model.User) (model.User, bool, error) {
 	muUser.Lock()
 	for i := range user {
@@ -281,6 +294,19 @@ func AddConcert(c model.Concert) error {
 	return saveConcerts()
 }
 
+func GetNextConcertID() int {
+	muConcert.Lock()
+	defer muConcert.Unlock()
+
+	maxID := 0
+	for _, c := range concert {
+		if c.ID > maxID {
+			maxID = c.ID
+		}
+	}
+	return maxID + 1
+}
+
 func UpdateConcert(id int, upd model.Concert) (model.Concert, bool, error) {
 	muConcert.Lock()
 	for i := range concert {
@@ -404,6 +430,19 @@ func AddBooking(b model.Booking) error {
 	return saveBookings()
 }
 
+func GetNextBookingID() int {
+	muBooking.Lock()
+	defer muBooking.Unlock()
+
+	maxID := 0
+	for _, b := range booking {
+		if b.ID > maxID {
+			maxID = b.ID
+		}
+	}
+	return maxID + 1
+}
+
 func UpdateBooking(id int, upd model.Booking) (model.Booking, bool, error) {
 	muBooking.Lock()
 	for i := range booking {
@@ -523,6 +562,19 @@ func AddNotification(n model.Notification) error {
 	notification = append(notification, n)
 	muNotification.Unlock()
 	return saveNotifications()
+}
+
+func GetNextNotificationID() int {
+	muNotification.Lock()
+	defer muNotification.Unlock()
+
+	maxID := 0
+	for _, n := range notification {
+		if n.ID > maxID {
+			maxID = n.ID
+		}
+	}
+	return maxID + 1
 }
 
 func UpdateNotification(id int, upd model.Notification) (model.Notification, bool, error) {

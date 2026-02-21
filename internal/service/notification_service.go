@@ -8,8 +8,14 @@ import (
 )
 
 func CreateNotification(n model.Notification) (model.Notification, error) {
-	if n.ID == 0 || n.ConcertID == 0 || n.UserID == 0 {
+	// Create не должен требовать ID от клиента
+	if n.ConcertID == 0 || n.UserID == 0 {
 		return model.Notification{}, ErrBadInput
+	}
+
+	// генерируем ID
+	if n.ID == 0 {
+		n.ID = repository.GetNextNotificationID()
 	}
 
 	if n.Status == "" {
@@ -78,4 +84,8 @@ func DeleteNotification(id int) error {
 		return ErrNotFound
 	}
 	return nil
+}
+
+func ListNotifications() []model.Notification {
+	return repository.GetNotificationSafeCopy()
 }

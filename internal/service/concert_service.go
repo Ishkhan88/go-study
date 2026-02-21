@@ -8,8 +8,14 @@ import (
 )
 
 func CreateConcert(c model.Concert) (model.Concert, error) {
-	if c.ID == 0 || c.Title == "" || c.Location == "" || c.OrganizerEmail == "" {
+	// Create не должен требовать ID от клиента
+	if c.Title == "" || c.Location == "" || c.OrganizerEmail == "" {
 		return model.Concert{}, ErrBadInput
+	}
+
+	// если ID не передали — сгенерируем
+	if c.ID == 0 {
+		c.ID = repository.GetNextConcertID()
 	}
 
 	now := time.Now()
@@ -17,6 +23,11 @@ func CreateConcert(c model.Concert) (model.Concert, error) {
 		c.CreatedAt = now
 	}
 	c.UpdatedAt = now
+
+	// если TicketsLeft не задан — логично приравнять к TicketsTotal
+	if c.TicketsLeft == 0 && c.TicketsTotal > 0 {
+		c.TicketsLeft = c.TicketsTotal
+	}
 
 	if err := repository.AddConcert(c); err != nil {
 		return model.Concert{}, err
@@ -67,4 +78,8 @@ func DeleteConcert(id int) error {
 		return ErrNotFound
 	}
 	return nil
+}
+
+func ListConcerts() []model.Concert {
+	return repository.GetConcertSafeCopy()
 }

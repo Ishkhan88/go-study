@@ -8,8 +8,14 @@ import (
 )
 
 func CreateUser(u model.User) (model.User, error) {
-	if u.ID == 0 || u.FirstName == "" || u.Email == "" {
+	// Create не должен требовать ID от клиента
+	if u.FirstName == "" || u.Email == "" {
 		return model.User{}, ErrBadInput
+	}
+
+	// если ID не передали — сгенерируем
+	if u.ID == 0 {
+		u.ID = repository.GetNextUserID()
 	}
 
 	now := time.Now()
@@ -68,4 +74,8 @@ func DeleteUser(id int) error {
 		return ErrNotFound
 	}
 	return nil
+}
+
+func ListUsers() []model.User {
+	return repository.GetUserSafeCopy()
 }

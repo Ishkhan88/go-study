@@ -1,0 +1,3 @@
+id,first_name,last_name,email,phone,avatar_url,created_at,updated_at
+1,Aram,Test,a@b.com,+7920009009,https://example.com/a.png,2026-02-21T04:03:18+03:00,2026-02-21T04:03:18+03:00
+2,Aram,Test,a@b.com,+7920009009,https://example.com/a.png,2026-02-21T04:06:00+03:00,2026-02-21T04:06:00+03:00
