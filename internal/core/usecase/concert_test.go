@@ -203,8 +203,7 @@ func TestConcertUsecase_Create(t *testing.T) {
 				t.Fatalf("unexpected error: %v", err)
 			}
 
-			// сравнение (Date/TicketPrice и др. поля сравнятся автоматически)
-			if !reflect.DeepEqual(tt.want, got) {
+						if !reflect.DeepEqual(tt.want, got) {
 				t.Fatalf("want %+v, got %+v", tt.want, got)
 			}
 		})

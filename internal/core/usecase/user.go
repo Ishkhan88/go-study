@@ -18,7 +18,6 @@ func NewUserUsecase(repo port.UserRepository, clock port.Clock) UserUsecase {
 }
 
 func (uc UserUsecase) Create(ctx context.Context, u model.User) (model.User, error) {
-	// обязательные поля как в твоём service/user_service.go
 	if u.FirstName == "" || u.Email == "" {
 		return model.User{}, apperr.ErrBadInput
 	}
@@ -72,7 +71,6 @@ func (uc UserUsecase) Update(ctx context.Context, id int, upd model.User) (model
 		return model.User{}, apperr.ErrNotFound
 	}
 
-	// обязательные поля
 	if upd.FirstName == "" || upd.Email == "" {
 		return model.User{}, apperr.ErrBadInput
 	}

@@ -29,12 +29,36 @@ import (
 // @name            Authorization
 
 func main() {
-	_ = godotenv.Load()
+	if err := godotenv.Load(".env"); err != nil {
+		log.Println("env load warning:", err)
+	}
 	cfg := config.Default()
 
-	if err := repository.LoadFromFiles(); err != nil {
-		log.Println("load error:", err)
+	// ---- Mongo init ----
+	if err := repository.InitMongo(context.Background(), cfg.MongoURI, cfg.MongoDB); err != nil {
+		log.Fatal("mongo init error:", err)
 	}
+	defer func() {
+		if err := repository.CloseMongo(context.Background()); err != nil {
+			log.Println("mongo close error:", err)
+		}
+	}()
+
+	// ---- Redis init (audit logs) ----
+	if err := repository.InitRedis(
+		context.Background(),
+		cfg.RedisAddr,
+		cfg.RedisPassword,
+		cfg.RedisDB,
+		cfg.LogTTLSeconds,
+	); err != nil {
+		log.Fatal("redis init error:", err)
+	}
+	defer func() {
+		if err := repository.CloseRedis(context.Background()); err != nil {
+			log.Println("redis close error:", err)
+		}
+	}()
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
@@ -63,6 +87,7 @@ func main() {
 	mux.HandleFunc("/api/notifications", handlerhttp.NotificationsHandler)
 	mux.HandleFunc("/api/notification", handlerhttp.NotificationHandler)
 	mux.HandleFunc("/api/notification/", handlerhttp.NotificationHandler)
+
 	server := &http.Server{
 		Addr:              cfg.ServerAddr,
 		Handler:           mux,

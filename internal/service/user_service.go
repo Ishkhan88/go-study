@@ -32,7 +32,6 @@ func DeleteUser(id int) error {
 	return userUC().Delete(context.Background(), id)
 }
 
-// Сохраняем сигнатуру для совместимости с текущими хендлерами
 func ListUsers() []model.User {
 	list, err := userUC().List(context.Background())
 	if err != nil {

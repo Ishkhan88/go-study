@@ -68,6 +68,10 @@ func (s *BookingsServer) Create(ctx context.Context, req *gostudyv1.CreateBookin
 	b := bookingFromProto(req.GetBooking())
 
 	created, err := service.CreateBooking(b)
+	if err != nil {
+		return nil, mapServiceErrBooking(err)
+	}
+
 	// После успешного создания брони — отправим уведомление в NotificationService.
 	// Ошибка уведомления НЕ должна ломать бронь (просто логируем).
 	addr := s.NotificationAddr
@@ -75,8 +79,7 @@ func (s *BookingsServer) Create(ctx context.Context, req *gostudyv1.CreateBookin
 		addr = "127.0.0.1:50052"
 	}
 
-	//go
-	func(userID, concertID int) {
+	go func(userID, concertID int) {
 		ctxN, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 
@@ -104,9 +107,6 @@ func (s *BookingsServer) Create(ctx context.Context, req *gostudyv1.CreateBookin
 			log.Printf("notify create error: %v", err)
 		}
 	}(created.UserID, created.ConcertID)
-	if err != nil {
-		return nil, mapServiceErrBooking(err)
-	}
 
 	return &gostudyv1.BookingResponse{Booking: bookingToProto(created)}, nil
 }

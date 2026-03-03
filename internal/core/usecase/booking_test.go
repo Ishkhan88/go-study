@@ -29,7 +29,6 @@ type fakeClock struct {
 func (c fakeClock) Now() time.Time { return c.now }
 
 // fakeBookingRepo реализует port.BookingRepository (через duck-typing на методы).
-// Тут мы делаем контролируемое поведение для каждого теста.
 type fakeBookingRepo struct {
 	nextIDVal int
 	nextIDErr error

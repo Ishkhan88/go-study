@@ -32,7 +32,6 @@ func DeleteConcert(id int) error {
 	return concertUC().Delete(context.Background(), id)
 }
 
-// Оставляем старую сигнатуру без error для совместимости с текущими хендлерами
 func ListConcerts() []model.Concert {
 	list, err := concertUC().List(context.Background())
 	if err != nil {

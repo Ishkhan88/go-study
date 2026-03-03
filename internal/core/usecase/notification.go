@@ -10,7 +10,7 @@ import (
 
 type NotificationUsecase struct {
 	repo  port.NotificationRepository
-	clock port.Clock // оставляем, даже если сейчас не используем (на будущее)
+	clock port.Clock 
 }
 
 func NewNotificationUsecase(repo port.NotificationRepository, clock port.Clock) NotificationUsecase {
@@ -60,8 +60,7 @@ func (uc NotificationUsecase) Update(ctx context.Context, id int, upd model.Noti
 		return model.Notification{}, apperr.ErrBadInput
 	}
 
-	// Проверим существование
-	_, ok, err := uc.repo.GetByID(ctx, id)
+		_, ok, err := uc.repo.GetByID(ctx, id)
 	if err != nil {
 		return model.Notification{}, err
 	}

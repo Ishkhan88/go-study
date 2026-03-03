@@ -1,41 +1,43 @@
 package service
 
 import (
-	"context"
+	"time"
 
-	"github.com/Ishkhan88/go-study/internal/core/port/clock"
-	"github.com/Ishkhan88/go-study/internal/core/usecase"
 	"github.com/Ishkhan88/go-study/internal/model"
 	"github.com/Ishkhan88/go-study/internal/repository"
 )
 
-func notificationUC() usecase.NotificationUsecase {
-	return usecase.NewNotificationUsecase(
-		repository.NotificationRepoAdapter{},
-		clock.SystemClock{},
-	)
+type NotificationService struct{}
+
+func NewNotificationService() *NotificationService {
+	return &NotificationService{}
 }
 
-func CreateNotification(n model.Notification) (model.Notification, error) {
-	return notificationUC().Create(context.Background(), n)
-}
-
-func GetNotification(id int) (model.Notification, error) {
-	return notificationUC().Get(context.Background(), id)
-}
-
-func UpdateNotification(id int, upd model.Notification) (model.Notification, error) {
-	return notificationUC().Update(context.Background(), id, upd)
-}
-
-func DeleteNotification(id int) error {
-	return notificationUC().Delete(context.Background(), id)
-}
-
-func ListNotifications() []model.Notification {
-	list, err := notificationUC().List(context.Background())
-	if err != nil {
-		return []model.Notification{}
+func (s *NotificationService) Create(n model.Notification) error {
+	n.ID = repository.NextNotificationID()
+	if n.SentAt.IsZero() {
+		n.SentAt = time.Now()
 	}
-	return list
+	return repository.CreateNotification(n)
+}
+
+func (s *NotificationService) GetAll() []model.Notification {
+	return repository.GetNotifications()
+}
+
+func (s *NotificationService) GetByID(id int) (model.Notification, bool) {
+	return repository.GetNotificationById(id)
+}
+
+func (s *NotificationService) Update(id int, upd model.Notification) (model.Notification, bool, error) {
+	upd.ID = id
+	// если sentAt не передали — проставим текущее
+	if upd.SentAt.IsZero() {
+		upd.SentAt = time.Now()
+	}
+	return repository.UpdateNotificationById(id, upd)
+}
+
+func (s *NotificationService) Delete(id int) (bool, error) {
+	return repository.DeleteNotificationById(id)
 }

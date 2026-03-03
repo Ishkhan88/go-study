@@ -8,8 +8,6 @@ import (
 	"github.com/Ishkhan88/go-study/internal/model"
 )
 
-// BookingUsecase содержит бизнес-логику работы с бронированиями.
-// Не зависит от http/grpc/CSV — только от портов (интерфейсов).
 type BookingUsecase struct {
 	repo  port.BookingRepository
 	clock port.Clock
@@ -36,9 +34,7 @@ func (uc BookingUsecase) Create(ctx context.Context, b model.Booking) (model.Boo
 	now := uc.clock.Now()
 
 	b.ID = id
-	// Если статус не задан — ставим дефолтный (подстрой при необходимости под твой проект).
 	if b.Status == "" {
-		// Если у тебя в model нет такой константы — замени на нужную, либо оставь "".
 		b.Status = model.StatusPending
 	}
 
