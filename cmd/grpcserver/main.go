@@ -71,7 +71,6 @@ func main() {
 	go func() {
 		<-ctx.Done()
 		log.Println("Shutdown signal received... stopping gRPC server")
-		// даём чуть времени на завершение текущих RPC
 		go func() {
 			time.Sleep(5 * time.Second)
 			s.Stop()

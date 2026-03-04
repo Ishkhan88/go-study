@@ -12,7 +12,6 @@ import (
 // -------- USERS --------
 
 func UserHandler(w http.ResponseWriter, r *http.Request) {
-	// POST /api/user
 	if r.URL.Path == "/api/user" {
 		if r.Method != http.MethodPost {
 			writeErr(w, 405, "only POST")
@@ -38,7 +37,6 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// /api/user/{id}
 	id, ok := parseID(r.URL.Path, "/api/user/")
 	if !ok {
 		writeErr(w, 400, "bad id")
@@ -91,7 +89,6 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 // -------- CONCERTS --------
 
 func ConcertHandler(w http.ResponseWriter, r *http.Request) {
-	// POST /api/concert
 	if r.URL.Path == "/api/concert" {
 		if r.Method != http.MethodPost {
 			writeErr(w, 405, "only POST")
@@ -117,7 +114,6 @@ func ConcertHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// /api/concert/{id}
 	id, ok := parseID(r.URL.Path, "/api/concert/")
 	if !ok {
 		writeErr(w, 400, "bad id")
@@ -170,7 +166,6 @@ func ConcertHandler(w http.ResponseWriter, r *http.Request) {
 // -------- BOOKINGS --------
 
 func BookingHandler(w http.ResponseWriter, r *http.Request) {
-	// POST /api/booking
 	if r.URL.Path == "/api/booking" {
 		if r.Method != http.MethodPost {
 			writeErr(w, 405, "only POST")
@@ -196,7 +191,6 @@ func BookingHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// /api/booking/{id}
 	id, ok := parseID(r.URL.Path, "/api/booking/")
 	if !ok {
 		writeErr(w, 400, "bad id")
@@ -249,7 +243,6 @@ func BookingHandler(w http.ResponseWriter, r *http.Request) {
 // -------- NOTIFICATIONS --------
 
 func NotificationHandler(w http.ResponseWriter, r *http.Request) {
-	// POST /api/notification
 	if r.URL.Path == "/api/notification" {
 		if r.Method != http.MethodPost {
 			writeErr(w, 405, "only POST")
@@ -327,7 +320,6 @@ func NotificationHandler(w http.ResponseWriter, r *http.Request) {
 
 // -------- HELPERS --------
 
-// mapServiceErr приводит ошибки service к HTTP кодам.
 func mapServiceErr(w http.ResponseWriter, err error) {
 	switch {
 	case errors.Is(err, service.ErrBadInput):
@@ -335,7 +327,6 @@ func mapServiceErr(w http.ResponseWriter, err error) {
 	case errors.Is(err, service.ErrNotFound):
 		writeErr(w, 404, "not found")
 	default:
-		// сюда попадут ошибки репозитория
 		writeErr(w, 500, "internal error")
 	}
 }

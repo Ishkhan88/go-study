@@ -29,7 +29,6 @@ func (s *BookingService) GetByID(id int) (model.Booking, bool) {
 }
 
 func (s *BookingService) Update(id int, upd model.Booking) (model.Booking, bool, error) {
-	// сохраним CreatedAt от старой записи, если есть
 	old, ok := repository.GetBookingById(id)
 	if !ok {
 		return model.Booking{}, false, nil

@@ -10,8 +10,6 @@ import (
 var bookingSvc = NewBookingService()
 var notificationSvc = NewNotificationService()
 
-// ---- Booking compat (сигнатуры как ждут http handlers) ----
-
 func CreateBooking(b model.Booking) (model.Booking, error) {
 	b.ID = repository.NextBookingID()
 	now := time.Now()
@@ -54,7 +52,6 @@ func DeleteBooking(id int) error {
 	return nil
 }
 
-// ListBookings нужен для gRPC List()
 func ListBookings() []model.Booking {
 	return bookingSvc.GetAll()
 }
@@ -103,7 +100,6 @@ func DeleteNotification(id int) error {
 	return nil
 }
 
-// ListNotifications нужен для gRPC List()
 func ListNotifications() []model.Notification {
 	return notificationSvc.GetAll()
 }

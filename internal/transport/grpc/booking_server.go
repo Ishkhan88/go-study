@@ -72,8 +72,6 @@ func (s *BookingsServer) Create(ctx context.Context, req *gostudyv1.CreateBookin
 		return nil, mapServiceErrBooking(err)
 	}
 
-	// После успешного создания брони — отправим уведомление в NotificationService.
-	// Ошибка уведомления НЕ должна ломать бронь (просто логируем).
 	addr := s.NotificationAddr
 	if addr == "" {
 		addr = "127.0.0.1:50052"

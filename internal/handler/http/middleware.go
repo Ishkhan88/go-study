@@ -29,7 +29,6 @@ func requireAuth(w http.ResponseWriter, r *http.Request) bool {
 
 	tokenStr := parts[1]
 	_, err := jwt.Parse(tokenStr, func(t *jwt.Token) (any, error) {
-		// важно: проверка алгоритма
 		if t.Method.Alg() != jwt.SigningMethodHS256.Alg() {
 			return nil, jwt.ErrTokenSignatureInvalid
 		}

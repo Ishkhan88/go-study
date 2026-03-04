@@ -9,7 +9,6 @@ import (
 )
 
 func NewItemsLogger(ctx context.Context, interval time.Duration) {
-	// 1) Baseline: сколько элементов уже есть на старте (после LoadFromFiles)
 	lastUserCount := len(repository.GetUserSafeCopy())
 	lastConcertCount := len(repository.GetConcertSafeCopy())
 	lastBookingCount := len(repository.GetBookingSafeCopy())
