@@ -11,8 +11,6 @@ import (
 )
 
 const (
-	// Если запускаешь общий сервер (users+concerts) отдельно — укажи его адрес.
-	// Можно запускать старый ./cmd/grpcserver на другом порту, например :50053.
 	monolithAddr = "127.0.0.1:50053"
 
 	bookingServiceAddr      = "127.0.0.1:50051"
@@ -29,21 +27,12 @@ func dial(ctx context.Context, addr string) (*grpc.ClientConn, error) {
 }
 
 func main() {
-	// общий контекст на выполнение всего сценария
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-
-	// ------------------------------------------------------------
-	// Часть A. Подготовка данных (User + Concert)
-	// Вариант 1: через монолитный grpcserver (если ты его запускаешь отдельно)
-	// Вариант 2: задать userID/concertID вручную (если они уже есть в CSV)
-	// ------------------------------------------------------------
 
 	var userID int64
 	var concertID int64
 
-	// ===== ВАРИАНТ 1 (рекомендуется для чистого теста): монолитный сервер =====
-	// Закомментируй этот блок, если не запускаешь монолит.
 	{
 		monoConn, err := dial(ctx, monolithAddr)
 		if err != nil {
@@ -89,20 +78,10 @@ func main() {
 		log.Printf("CONCERT CREATED: id=%d title=%s left=%d", c.GetId(), c.GetTitle(), c.GetTicketsLeft())
 	}
 
-	// ===== ВАРИАНТ 2: если монолит не запускаешь, просто задай ID вручную =====
-	// userID = 1
-	// concertID = 1
-
 	if userID == 0 || concertID == 0 {
 		log.Fatalf("userID/concertID are zero: userID=%d concertID=%d (set manually or run monolith)", userID, concertID)
 	}
 
-	// ------------------------------------------------------------
-	// Часть B. Тест взаимодействия микросервисов
-	// BookingService -> NotificationService
-	// ------------------------------------------------------------
-
-	// --- connect bookingserver ---
 	bookingConn, err := dial(ctx, bookingServiceAddr)
 	if err != nil {
 		log.Fatalf("booking connect error (%s): %v", bookingServiceAddr, err)
@@ -111,12 +90,10 @@ func main() {
 
 	bookings := gostudyv1.NewBookingsServiceClient(bookingConn)
 
-	// --- CREATE BOOKING (должно триггернуть авто-уведомление) ---
 	bCreateResp, err := bookings.Create(ctx, &gostudyv1.CreateBookingRequest{
 		Booking: &gostudyv1.Booking{
 			UserId:    userID,
 			ConcertId: concertID,
-			// Status не задаём -> будет pending
 		},
 	})
 	if err != nil {
@@ -125,7 +102,6 @@ func main() {
 	b := bCreateResp.GetBooking()
 	log.Printf("BOOKING CREATED: id=%d user=%d concert=%d status=%s", b.GetId(), b.GetUserId(), b.GetConcertId(), b.GetStatus())
 
-	// Немного подождём, чтобы goroutine в bookingserver успела создать уведомление
 	time.Sleep(200 * time.Millisecond)
 
 	// --- connect notificationserver ---
@@ -137,14 +113,12 @@ func main() {
 
 	notifications := gostudyv1.NewNotificationsServiceClient(notifConn)
 
-	// --- LIST NOTIFICATIONS (должно быть >= 1 и содержать userID+concertID) ---
 	nListResp, err := notifications.List(ctx, &gostudyv1.ListRequest{})
 	if err != nil {
 		log.Fatalf("Notification List error: %v", err)
 	}
 	log.Printf("NOTIFICATION LIST: total=%d", len(nListResp.GetNotifications()))
 
-	// (по желанию) можно вывести последние 3 уведомления
 	ns := nListResp.GetNotifications()
 	start := 0
 	if len(ns) > 3 {
@@ -154,7 +128,4 @@ func main() {
 		log.Printf("NOTIFICATION: id=%d user=%d concert=%d status=%s", n.GetId(), n.GetUserId(), n.GetConcertId(), n.GetStatus())
 	}
 
-	// --- CLEANUP (по желанию) ---
-	// Можно удалить booking:
-	// _, _ = bookings.Delete(ctx, &gostudyv1.IdRequest{Id: b.GetId()})
 }

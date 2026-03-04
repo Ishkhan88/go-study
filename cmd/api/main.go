@@ -14,6 +14,7 @@ import (
 	"github.com/Ishkhan88/go-study/internal/config"
 	handlerhttp "github.com/Ishkhan88/go-study/internal/handler/http"
 	"github.com/Ishkhan88/go-study/internal/repository"
+	"github.com/Ishkhan88/go-study/internal/repository/postgres"
 	"github.com/Ishkhan88/go-study/internal/service"
 	"github.com/joho/godotenv"
 	httpSwagger "github.com/swaggo/http-swagger"
@@ -39,6 +40,16 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
+	pgdb, err := postgres.New(ctx)
+	if err != nil {
+		log.Fatal("postgres connect error:", err)
+	}
+	defer pgdb.Pool.Close()
+
+	concertsRepo := postgres.NewConcertsRepository(pgdb)
+	bookingsRepo := postgres.NewBookingsRepository(pgdb)
+	service.InitPostgresRepos(concertsRepo, bookingsRepo)
+
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/api/login", handlerhttp.LoginHandler)
@@ -63,6 +74,7 @@ func main() {
 	mux.HandleFunc("/api/notifications", handlerhttp.NotificationsHandler)
 	mux.HandleFunc("/api/notification", handlerhttp.NotificationHandler)
 	mux.HandleFunc("/api/notification/", handlerhttp.NotificationHandler)
+
 	server := &http.Server{
 		Addr:              cfg.ServerAddr,
 		Handler:           mux,

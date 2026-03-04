@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/Ishkhan88/go-study/internal/model"
 	"github.com/Ishkhan88/go-study/internal/service"
@@ -170,6 +172,30 @@ func ConcertHandler(w http.ResponseWriter, r *http.Request) {
 // -------- BOOKINGS --------
 
 func BookingHandler(w http.ResponseWriter, r *http.Request) {
+	// CONFIRM: POST /api/booking/{id}/confirm
+	if r.Method == http.MethodPost && strings.HasSuffix(r.URL.Path, "/confirm") {
+		const prefix = "/api/booking/"
+		rest := strings.TrimPrefix(r.URL.Path, prefix) // "{id}/confirm"
+		parts := strings.Split(rest, "/")
+		if len(parts) == 2 && parts[1] == "confirm" {
+			id, err := strconv.ParseInt(parts[0], 10, 64)
+			if err != nil || id <= 0 {
+				writeErr(w, 400, "bad id")
+				return
+			}
+
+			if err := service.ConfirmBooking(id); err != nil {
+				mapServiceErr(w, err)
+				return
+			}
+
+			writeJSON(w, 200, map[string]any{"status": "confirmed", "id": id})
+			return
+		}
+		writeErr(w, 400, "bad path")
+		return
+	}
+
 	// POST /api/booking
 	if r.URL.Path == "/api/booking" {
 		if r.Method != http.MethodPost {
@@ -327,7 +353,6 @@ func NotificationHandler(w http.ResponseWriter, r *http.Request) {
 
 // -------- HELPERS --------
 
-// mapServiceErr приводит ошибки service к HTTP кодам.
 func mapServiceErr(w http.ResponseWriter, err error) {
 	switch {
 	case errors.Is(err, service.ErrBadInput):
@@ -335,7 +360,6 @@ func mapServiceErr(w http.ResponseWriter, err error) {
 	case errors.Is(err, service.ErrNotFound):
 		writeErr(w, 404, "not found")
 	default:
-		// сюда попадут ошибки репозитория
 		writeErr(w, 500, "internal error")
 	}
 }

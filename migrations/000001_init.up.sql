@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS users (
+  id BIGSERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  email TEXT UNIQUE NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS concerts (
+  id BIGSERIAL PRIMARY KEY,
+  title TEXT NOT NULL,
+  date TIMESTAMPTZ NOT NULL,
+  tickets_total INT NOT NULL,
+  tickets_left INT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS bookings (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL REFERENCES users(id),
+  concert_id BIGINT NOT NULL REFERENCES concerts(id),
+  status TEXT NOT NULL DEFAULT 'pending',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
