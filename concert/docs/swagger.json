@@ -1,0 +1,214 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API для концертов и покупки билетов",
+        "title": "Concert Service API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8082",
+    "basePath": "/",
+    "paths": {
+        "/concerts": {
+            "get": {
+                "description": "Возвращает список всех концертов",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "concerts"
+                ],
+                "summary": "Список концертов",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Concert"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "cannot get concerts",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Создаёт новый концерт",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "concerts"
+                ],
+                "summary": "Создать концерт",
+                "parameters": [
+                    {
+                        "description": "Concert data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Concert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/model.Concert"
+                        }
+                    },
+                    "400": {
+                        "description": "invalid request body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "cannot create concert",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/concerts/{id}": {
+            "get": {
+                "description": "Возвращает один концерт",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "concerts"
+                ],
+                "summary": "Получить концерт по id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Concert ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Concert"
+                        }
+                    },
+                    "400": {
+                        "description": "invalid concert id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "concert not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/concerts/{id}/buy-ticket": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Создаёт запрос на билет и уменьшает tickets_left",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "concerts"
+                ],
+                "summary": "Купить билет",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Concert ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "no tickets available or ticket cannot be created",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "missing authorization header",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "model.Concert": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "organizer_email": {
+                    "type": "string"
+                },
+                "tickets_left": {
+                    "type": "integer"
+                },
+                "tickets_total": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

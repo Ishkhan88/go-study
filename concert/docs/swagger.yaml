@@ -1,0 +1,140 @@
+basePath: /
+definitions:
+  model.Concert:
+    properties:
+      date:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      location:
+        type: string
+      organizer_email:
+        type: string
+      tickets_left:
+        type: integer
+      tickets_total:
+        type: integer
+      title:
+        type: string
+    type: object
+host: localhost:8082
+info:
+  contact: {}
+  description: API для концертов и покупки билетов
+  title: Concert Service API
+  version: "1.0"
+paths:
+  /concerts:
+    get:
+      description: Возвращает список всех концертов
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Concert'
+            type: array
+        "500":
+          description: cannot get concerts
+          schema:
+            type: string
+      summary: Список концертов
+      tags:
+      - concerts
+    post:
+      consumes:
+      - application/json
+      description: Создаёт новый концерт
+      parameters:
+      - description: Concert data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/model.Concert'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Concert'
+        "400":
+          description: invalid request body
+          schema:
+            type: string
+        "500":
+          description: cannot create concert
+          schema:
+            type: string
+      summary: Создать концерт
+      tags:
+      - concerts
+  /concerts/{id}:
+    get:
+      description: Возвращает один концерт
+      parameters:
+      - description: Concert ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Concert'
+        "400":
+          description: invalid concert id
+          schema:
+            type: string
+        "404":
+          description: concert not found
+          schema:
+            type: string
+      summary: Получить концерт по id
+      tags:
+      - concerts
+  /concerts/{id}/buy-ticket:
+    post:
+      description: Создаёт запрос на билет и уменьшает tickets_left
+      parameters:
+      - description: Concert ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: no tickets available or ticket cannot be created
+          schema:
+            type: string
+        "401":
+          description: missing authorization header
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Купить билет
+      tags:
+      - concerts
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

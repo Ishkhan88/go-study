@@ -1,3 +1,0 @@
-id,user_id,concert_id,status,created_at,updated_at
-1,1,1,pending,2026-02-21T04:03:18+03:00,2026-02-21T04:03:18+03:00
-2,2,2,pending,2026-02-21T04:06:00+03:00,2026-02-21T04:06:00+03:00

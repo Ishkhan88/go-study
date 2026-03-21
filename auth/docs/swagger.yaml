@@ -1,0 +1,132 @@
+basePath: /
+definitions:
+  handler.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  handler.LoginResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  handler.ProfileResponse:
+    properties:
+      message:
+        type: string
+      user_id: {}
+    type: object
+  handler.RegisterRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    type: object
+  handler.RegisterResponse:
+    properties:
+      avatar_url:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+host: localhost:8081
+info:
+  contact: {}
+  description: API для регистрации, логина и профиля пользователя
+  title: Auth Service API
+  version: "1.0"
+paths:
+  /api/auth/users:
+    post:
+      consumes:
+      - application/json
+      description: Выполняет вход и возвращает JWT токен
+      parameters:
+      - description: Логин пользователя
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handler.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.LoginResponse'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: invalid email or password
+          schema:
+            type: string
+      summary: Логин пользователя
+      tags:
+      - auth
+  /api/users:
+    post:
+      consumes:
+      - application/json
+      description: Создаёт нового пользователя
+      parameters:
+      - description: Данные пользователя
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handler.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handler.RegisterResponse'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "500":
+          description: cannot create user
+          schema:
+            type: string
+      summary: Регистрация пользователя
+      tags:
+      - auth
+  /api/users/profile:
+    get:
+      description: Возвращает user_id из JWT токена
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.ProfileResponse'
+        "401":
+          description: missing authorization header
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Профиль пользователя
+      tags:
+      - auth
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
